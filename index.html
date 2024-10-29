@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Registration Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h2>User Register Form</h2>
+        <form id="registrationForm">
+            <!-- First Name -->
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <span id="usernameFeedback" class="feedback"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <input type="submit" value="Register" class="submit-btn">
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#username').on('keyup', function() {
+                let username = $(this).val();
+                if (username.length >= 3) {
+                    $.ajax({
+                        url: 'check_username.php',
+                        type: 'POST',
+                        data: { username: username, action: 'check' },
+                        success: function(response) {
+                            const feedbackElement = $('#usernameFeedback');
+                            if (response === 'available') {
+                                feedbackElement
+                                    .text('Username is available')
+                                    .addClass('available visible')
+                                    .removeClass('unavailable');
+                            } else {
+                                feedbackElement
+                                    .text('Username is taken')
+                                    .addClass('unavailable visible')
+                                    .removeClass('available');
+                            }
+                        }
+                    });
+                } else {
+                    $('#usernameFeedback')
+                        .text('Username must be at least 3 characters long')
+                        .addClass('unavailable visible')
+                        .removeClass('available');
+                }
+            });
+
+            $('#registrationForm').on('submit', function(e) {
+                e.preventDefault();
+                let username = $('#username').val();
+
+                // Register the username if it is available
+                $.ajax({
+                    url: 'check_username.php',
+                    type: 'POST',
+                    data: { username: username, action: 'register' },
+                    success: function(response) {
+                        if (response === 'registered') {
+                            alert('Registration successful!');
+                        } else if (response === 'taken') {
+                            alert('Username already taken. Please choose another one.');
+                        }
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
